@@ -84,6 +84,39 @@ public class ProductFinderTest {
     }
 
     @Test
+    public void updateProductApiToken_shouldUpdateApiToken_whenFound() {
+        String externalId = "1";
+        String oldPayApiToken = "old Pay API token";
+        String newPayApiToken = "new Pay API token";
+        ProductEntity productEntity = new ProductEntity();
+        productEntity.setExternalId(externalId);
+        productEntity.setReferenceEnabled(false);
+        productEntity.setPayApiToken(oldPayApiToken);
+        when(productDao.findByExternalId(externalId)).thenReturn(Optional.of(productEntity));
+
+        Optional<Product> productOptional = productFinder.findByExternalId(externalId);
+        assertThat(productOptional.isPresent(), is(true));
+        assertThat(productOptional.get().getPayApiToken(), is(oldPayApiToken));
+
+        Optional<Product> updatedProduct = productFinder.updatePayApiTokenByExternalId(externalId, newPayApiToken);
+
+        assertThat(updatedProduct.isPresent(), is(true));
+        assertThat(updatedProduct.get().getPayApiToken(), is(newPayApiToken));
+    }
+
+    @Test
+    public void updateProductApiToken_shouldReturnEmpty_whenNotFound() {
+        String externalId = "1";
+        ProductEntity productEntity = new ProductEntity();
+        productEntity.setExternalId(externalId);
+        when(productDao.findByExternalId(externalId)).thenReturn(Optional.empty());
+
+        Optional<Product> disabledProduct = productFinder.updatePayApiTokenByExternalId(externalId, "new Pay API token");
+
+        assertFalse(disabledProduct.isPresent());
+    }
+
+    @Test
     public void disableByExternalId_shouldDisableProduct_whenFound() {
         String externalId = "1";
         ProductEntity productEntity = new ProductEntity();
